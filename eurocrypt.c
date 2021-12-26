@@ -64,41 +64,41 @@ const static ec_mode_t _ec_modes[] = {
 	{ "CD1A7890",       EC_S,    EC_S, { 0x07, 0x3A, 0x0F, 0xB1, 0x4E, 0x49, 0x6D }, { 0x00, 0x2B, 0x11 }, { "03/12/1998" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
 	{ "CD2A7890",       EC_S,    EC_S, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59 }, { 0x00, 0x2B, 0x12 }, { "03/12/1998" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
 	{ "CD3A7890",       EC_S,    EC_S, { 0x76, 0xBF, 0x8E, 0xF4, 0xA1, 0x65, 0xB4 }, { 0x00, 0x2B, 0x13 }, { "03/12/1998" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
-	{ "CD3DDA7890",     EC_3DES, EC_3DES, { 0x07, 0x3A, 0x0F, 0xB1, 0x4E, 0x49, 0x6D,   /* Key 01 and key 02 - index key D */
+	{ "CDDDA7890",     EC_3DES, EC_3DES, { 0x07, 0x3A, 0x0F, 0xB1, 0x4E, 0x49, 0x6D,   /* Key 01 and key 02 - index key D */
 	                               0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59 }, { 0x00, 0x2B, 0x1D }, { "03/12/1998" }, { 0xFF, 0x00 }, "Canal+ (3DES)" },
-	{ "CD3DEA7890",     EC_3DES, EC_3DES, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59,   /* Key 02 and key 03 - index key E */
+	{ "CDDEA7890",     EC_3DES, EC_3DES, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59,   /* Key 02 and key 03 - index key E */
 	                               0x76, 0xBF, 0x8E, 0xF4, 0xA1, 0x65, 0xB4 }, { 0x00, 0x2B, 0x1E }, { "03/12/1998" }, { 0xFF, 0x00 }, "Canal+ (3DES)" },
 	{ "CD0B0286",      EC_S,    EC_S, { 0XA9, 0X91, 0X86, 0X2C, 0X90, 0X6B, 0X9A }, { 0x00, 0x2B, 0x10 }, { "25/08/1998" }, { 0xFF, 0x00 }, "Canal+ (S2)" },                               
 	{ "CD1B0286",      EC_S,    EC_S, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6 }, { 0x00, 0x2B, 0x11 }, { "25/08/1998" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
 	{ "CD2B0286",      EC_S,    EC_S, { 0X71, 0X77, 0X7D, 0X16, 0X54, 0X71, 0XA3 }, { 0x00, 0x2B, 0x12 }, { "25/08/1998" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
 	{ "CD3B0286",      EC_S,    EC_S, { 0X07, 0XA3, 0X6C, 0XF8, 0X64, 0X37, 0XF4 }, { 0x00, 0x2B, 0x13 }, { "25/08/1998" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
-	{ "CD3DDB0286",   EC_3DES, EC_3DES, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6,   /* Key 01 and key 02 - index key D */
+	{ "CDDDB0286",   EC_3DES, EC_3DES, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6,   /* Key 01 and key 02 - index key D */
 	                               0X71, 0X77, 0X7D, 0X16, 0X54, 0X71, 0XA3 }, { 0x00, 0x2B, 0x1D }, { "25/08/1998" }, { 0xFF, 0x00 }, "Canal+ (3DES)" },
-	{ "CD3DEB0286",    EC_3DES, EC_3DES, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59,   /* Key 02 and key 03 - index key E */
+	{ "CDDEB0286",    EC_3DES, EC_3DES, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59,   /* Key 02 and key 03 - index key E */
 	                               0x76, 0xBF, 0x8E, 0xF4, 0xA1, 0x65, 0xB4 }, { 0x00, 0x2B, 0x1E }, { "25/08/1998" }, { 0xFF, 0x00 }, "Canal+ (3DES)" },
 	{ "CD0C4972",      EC_S,    EC_S, { 0XA9, 0X91, 0X86, 0X2C, 0X90, 0X6B, 0X9A }, { 0x00, 0x2B, 0x10 }, { "28/09/1999" }, { 0xFF, 0x00 }, "Canal+ (S2)" },                               
 	{ "CD1C4972",      EC_S,    EC_S, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6 }, { 0x00, 0x2B, 0x11 }, { "28/09/1999" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
 	{ "CD2C4972",      EC_S,    EC_S, { 0X71, 0X77, 0X7D, 0X16, 0X54, 0X71, 0XA3 }, { 0x00, 0x2B, 0x12 }, { "28/09/1999" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
 	{ "CD3C4972",      EC_S,    EC_S, { 0X07, 0XA3, 0X6C, 0XF8, 0X64, 0X37, 0XF4 }, { 0x00, 0x2B, 0x13 }, { "28/09/1999" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
-	{ "CD3DDC4972",   EC_3DES, EC_3DES, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6,   /* Key 01 and key 02 - index key D */
+	{ "CDDDC4972",   EC_3DES, EC_3DES, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6,   /* Key 01 and key 02 - index key D */
 	                               0X71, 0X77, 0X7D, 0X16, 0X54, 0X71, 0XA3 }, { 0x00, 0x2B, 0x1D }, { "28/09/1999" }, { 0xFF, 0x00 }, "Canal+ (3DES)" },
-	{ "CD3DEC4972",    EC_3DES, EC_3DES, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59,   /* Key 02 and key 03 - index key E */
+	{ "CDDEC4972",    EC_3DES, EC_3DES, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59,   /* Key 02 and key 03 - index key E */
 	                               0x76, 0xBF, 0x8E, 0xF4, 0xA1, 0x65, 0xB4 }, { 0x00, 0x2B, 0x1E }, { "28/09/1999" }, { 0xFF, 0x00 }, "Canal+ (3DES)" },
 	{ "CD0D9375",      EC_S,    EC_S, { 0XA9, 0X91, 0X86, 0X2C, 0X90, 0X6B, 0X9A }, { 0x00, 0x2B, 0x10 }, { "12/01/1999" }, { 0xFF, 0x00 }, "Canal+ (S2)" },                               
 	{ "CD1D9375",      EC_S,    EC_S, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6 }, { 0x00, 0x2B, 0x11 }, { "12/01/1999" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
 	{ "CD2D9375",      EC_S,    EC_S, { 0X71, 0X77, 0X7D, 0X16, 0X54, 0X71, 0XA3 }, { 0x00, 0x2B, 0x12 }, { "12/01/1999" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
 	{ "CD3D9375",      EC_S,    EC_S, { 0X07, 0XA3, 0X6C, 0XF8, 0X64, 0X37, 0XF4 }, { 0x00, 0x2B, 0x13 }, { "12/01/1999" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
-	{ "CD3DDD9375",   EC_3DES, EC_3DES, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6,   /* Key 01 and key 02 - index key D */
+	{ "CDDDD9375",   EC_3DES, EC_3DES, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6,   /* Key 01 and key 02 - index key D */
 	                               0X71, 0X77, 0X7D, 0X16, 0X54, 0X71, 0XA3 }, { 0x00, 0x2B, 0x1D }, { "12/01/1999" }, { 0xFF, 0x00 }, "Canal+ (3DES)" },
-	{ "CD3DED9375",    EC_3DES, EC_3DES, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59,   /* Key 02 and key 03 - index key E */
+	{ "CDDED9375",    EC_3DES, EC_3DES, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59,   /* Key 02 and key 03 - index key E */
 	                               0x76, 0xBF, 0x8E, 0xF4, 0xA1, 0x65, 0xB4 }, { 0x00, 0x2B, 0x1E }, { "12/01/1999" }, { 0xFF, 0x00 }, "Canal+ (3DES)" },
 	{ "CD0E0170",      EC_S,    EC_S, { 0XA9, 0X91, 0X86, 0X2C, 0X90, 0X6B, 0X9A }, { 0x00, 0x2B, 0x10 }, { "21/09/2000" }, { 0xFF, 0x00 }, "Canal+ (S2)" },                               
 	{ "CD1E0170",      EC_S,    EC_S, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6 }, { 0x00, 0x2B, 0x11 }, { "21/09/2000" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
 	{ "CD2E0170",      EC_S,    EC_S, { 0X71, 0X77, 0X7D, 0X16, 0X54, 0X71, 0XA3 }, { 0x00, 0x2B, 0x12 }, { "21/09/2000" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
 	{ "CD3E0170",      EC_S,    EC_S, { 0X07, 0XA3, 0X6C, 0XF8, 0X64, 0X37, 0XF4 }, { 0x00, 0x2B, 0x13 }, { "21/09/2000" }, { 0xFF, 0x00 }, "Canal+ (S2)" },
-	{ "CD3DDE0170",   EC_3DES, EC_3DES, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6,   /* Key 01 and key 02 - index key D */
+	{ "CDDDE0170",   EC_3DES, EC_3DES, { 0XA9, 0X1B, 0X08, 0X0E, 0XFE, 0X69, 0XD6,   /* Key 01 and key 02 - index key D */
 	                               0X71, 0X77, 0X7D, 0X16, 0X54, 0X71, 0XA3 }, { 0x00, 0x2B, 0x1D }, { "21/09/2000" }, { 0xFF, 0x00 }, "Canal+ (3DES)" },
-	{ "CD3DEE0170",    EC_3DES, EC_3DES, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59,   /* Key 02 and key 03 - index key E */
+	{ "CDDEE0170",    EC_3DES, EC_3DES, { 0xA3, 0x53, 0x0C, 0x12, 0x55, 0xA3, 0x59,   /* Key 02 and key 03 - index key E */
 	                               0x76, 0xBF, 0x8E, 0xF4, 0xA1, 0x65, 0xB4 }, { 0x00, 0x2B, 0x1E }, { "21/09/2000" }, { 0xFF, 0x00 }, "Canal+ (3DES)" },
         { "cplusfr43",    EC_M,    EC_M, { 0x69, 0x41, 0x2D, 0x4C, 0x56, 0x28, 0xCF }, { 0x10, 0x00, 0x18 }, { "today"      }, { 0xFF, 0x00 }, "Canal+ 4/3 (M)" },
 	{ "cplusfr169",   EC_M,    EC_M, { 0xEC, 0xA6, 0xE8, 0x4E, 0x10, 0x41, 0x6F }, { 0x10, 0x00, 0x28 }, { "today"      }, { 0xFF, 0x00 }, "Canal+ 16/9 (M)" },
