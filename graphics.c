@@ -58,7 +58,7 @@ const pngs_t png_logos[] = {
         { "skypremier1998", _png_premier1998,    IMG_POS_TL, sizeof(_png_premier1998) },
         { "skymoviemax",    _png_skymoviemax,    IMG_POS_TL, sizeof(_png_skymoviemax) },
 	{ "tv3",            _png_tv3,            IMG_POS_TL, sizeof(_png_tv3) },
-	{ "tv21998",        _png_tv21998,        IMG_POS_TL, sizeof(_png_tv21998) },
+	{ "tv21998",        _png_tv21998,        IMG_POS_TR, sizeof(_png_tv21998) },
 	{ "childrenschannel",  _png_childrenschannel,   IMG_POS_TR, sizeof(_png_childrenschannel) },
 	{ NULL,             NULL,                0,          0 }
 };
