@@ -146,7 +146,7 @@ static _vc_block_t _sky10_blocks[] = {
 
 /* Blocks for VC1 conditional-access sample, */
 /* requires an active Sky 10 (0A) series card to decode with SKY ONE ON SCREEN */
-static _vc_block_t _sky10SKYONE_blocks[] = {
+static _vc_block_t _sky10skyone_blocks[] = {
 	{
 		0x07, 0x16DEC6F6FD37145BUL,
 		{
