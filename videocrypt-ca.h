@@ -45,6 +45,7 @@ enum {
 	VC_SKY09,
 	VC_SKY09_NANO,
 	VC_SKY10,
+	VC_SKY10skyone,
 	VC_SKY10_PPV,
 	VC_SKY11,
 	VC_SKY12,
