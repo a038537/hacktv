@@ -30,7 +30,6 @@ const pngs_t png_logos[] = {
 	{ "cartoonnetwork", _png_cartoonnetwork, IMG_POS_TR, sizeof(_png_cartoonnetwork) },
 	{ "tv1000",         _png_tv1000,         IMG_POS_TR, sizeof(_png_tv1000) },
 	{ "filmnet1",       _png_filmnet1,       IMG_POS_TR, sizeof(_png_filmnet1) },
-	{ "filmnetplus",    _png_filmnet_plus,   IMG_POS_TR, sizeof(_png_filmnet_plus) },
 	{ "canal+",         _png_canalplus,      IMG_POS_TR, sizeof(_png_canalplus) },
 	{ "eurotica",       _png_eurotica,       IMG_POS_TR, sizeof(_png_eurotica) },
 	{ "mtv",            _png_mtv,            IMG_POS_TR, sizeof(_png_mtv) },
@@ -39,6 +38,39 @@ const pngs_t png_logos[] = {
 	{ "multichoice",    _png_multichoice,    IMG_POS_TR, sizeof(_png_multichoice) },
 	{ "skyone",         _png_skyone,         IMG_POS_TL, sizeof(_png_skyone) },
 	{ "sky",            _png_sky,            IMG_POS_BR, sizeof(_png_sky) },
+/* My Logos */
+        { "bbcfirst",       _png_bbcfirst,       IMG_POS_BR, sizeof(_png_bbcfirst) },
+	{ "viasat",         _png_viasat,         IMG_POS_TR, sizeof(_png_viasat) },
+	{ "viasatplus",     _png_viasatplus,     IMG_POS_TR, sizeof(_png_viasatplus) },
+	{ "viasatticket",   _png_viasatticket,   IMG_POS_TR, sizeof(_png_viasatticket) },
+	{ "ztv",            _png_ztv,            IMG_POS_TR, sizeof(_png_ztv) },
+	{ "ztv2",           _png_ztv2,           IMG_POS_TR, sizeof(_png_ztv2) },
+	{ "foxkids",        _png_foxkids,        IMG_POS_TR, sizeof(_png_foxkids) },
+	{ "tps",            _png_tps,            IMG_POS_TR, sizeof(_png_tps) },
+	{ "hallmark",       _png_hallmark,       IMG_POS_TR, sizeof(_png_hallmark) },
+	{ "tv10001",        _png_tv10001,        IMG_POS_TR, sizeof(_png_tv10001) },
+	{ "tv10002",        _png_tv10002,        IMG_POS_TR, sizeof(_png_tv10002) },
+	{ "tv10003",        _png_tv10003,        IMG_POS_TR, sizeof(_png_tv10003) },
+	{ "tv10004",        _png_tv10004,        IMG_POS_TR, sizeof(_png_tv10004) },
+	{ "tv1",            _png_tv1,            IMG_POS_TL, sizeof(_png_tv1) },
+	{ "TV11997",            _png_TV11997,            IMG_POS_TL, sizeof(_png_TV11997) },
+	{ "TV12019",   	       _png_TV12019,            IMG_POS_TL, sizeof(_png_TV12019) },
+	{ "VTM2020",   	       _png_VTM2020,            IMG_POS_TL, sizeof(_png_VTM2020) },
+	{ "KANAALTWEE",   	       _png_KANAALTWEE,            IMG_POS_TL, sizeof(_png_KANAALTWEE) },
+	{ "VT4WHITE",   	       _png_VT4WHITE,            IMG_POS_TL, sizeof(_png_VT4WHITE) },
+        { "TV4SVERIGE",   	       _png_TV4SVERIGE,            IMG_POS_TL, sizeof(_png_TV4SVERIGE) },
+	{ "rtl4",           _png_rtl4,           IMG_POS_TL, sizeof(_png_rtl4) },
+	{ "rtl5",           _png_rtl5,           IMG_POS_TL, sizeof(_png_rtl5) },
+	{ "skyone1998",     _png_skyone1998,     IMG_POS_TL, sizeof(_png_skyone1998) },
+        { "skypremier1998", _png_premier1998,    IMG_POS_TL, sizeof(_png_premier1998) },
+        { "skymoviemax",    _png_skymoviemax,    IMG_POS_TL, sizeof(_png_skymoviemax) },
+	{ "tv3",            _png_tv3,            IMG_POS_TL, sizeof(_png_tv3) },
+	{ "tv21998",        _png_tv21998,        IMG_POS_TR, sizeof(_png_tv21998) },
+	{ "premiere1993",   _png_premiere1993,        IMG_POS_TR, sizeof(_png_premiere1993) },
+	{ "childrenschannel",  _png_childrenschannel,   IMG_POS_TR, sizeof(_png_childrenschannel) },
+	{ "filmnetredblue",    _png_filmnetredblue,     IMG_POS_TR, sizeof(_png_filmnetredblue) },
+	{ "tnt",         _png_tnt,     IMG_POS_TR, sizeof(_png_tnt) },
+	{ "tcmmovies",         _png_tcmmovies,     IMG_POS_TR, sizeof(_png_tcmmovies) },
 	{ NULL,             NULL,                0,          0 }
 };
 
@@ -186,17 +218,9 @@ static int _read_png_data(image_t *image, const pngs_t *pngs)
 	return (HACKTV_OK);
 }
 
-int load_png(image_t **s, int width, int height, char *image_name, float scale, float ratio, int type)
+int load_png(image_t *image, int width, int height, char *image_name, float scale, float ratio, int type)
 {
 	const pngs_t *pngs;
-
-	image_t *image;
-	image = calloc(1, sizeof(image_t));
-	if(!image)
-	{
-		return(HACKTV_OUT_OF_MEMORY);
-	}
-
 	image->name = image_name;
 	
 	/* Find the image */
@@ -280,10 +304,9 @@ int load_png(image_t **s, int width, int height, char *image_name, float scale, 
 		}
 		
 		resize_bitmap(logo, image->logo, image->width, image->height, image->img_width, image->img_height);
-		*s = image;
 		return(HACKTV_OK);
 	}
-
+	
 	return(HACKTV_ERROR);
 }
 
