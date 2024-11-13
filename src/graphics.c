@@ -288,7 +288,7 @@ int load_png(image_t **s, int width, int height, char *image_name, float scale, 
 }
 
 
-void overlay_image(uint32_t *framebuffer, image_t *l, int vid_width, int vid_height, int pos)
+void overlay_image(uint32_t *framebuffer, image_t *l, int vid_width, int line_stride, int vid_height, int pos)
 {
 	int i, j, x, y, r, g, b, vi;
 	float t;
@@ -357,7 +357,7 @@ void overlay_image(uint32_t *framebuffer, image_t *l, int vid_width, int vid_hei
 				t = 1.0 - (float) (c >> 24) / 0xFF;
 				
 				/* Set logo position */
-				vi = i * vid_width + j;
+				vi = i * line_stride + j;
 				
 				/* Apply transparency  */
 				r = ((framebuffer[vi] >> 16) & 0xFF) * t + ((c >> 16) & 0xFF) * (1 - t);

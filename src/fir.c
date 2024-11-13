@@ -68,6 +68,24 @@ static void kaiser(double *taps, size_t ntaps, double beta)
 	taps[ntaps - 1] = i_beta;
 }
 
+void fir_normalise(double *taps, size_t ntaps, double f)
+{
+	double a;
+	int i;
+	
+	for(a = i = 0; i < ntaps; i++)
+	{
+		a += taps[i];
+	}
+	
+	a = a / f;
+	
+	for(i = 0; i < ntaps; i++)
+	{
+		taps[i] /= a;
+	}
+}
+
 void fir_low_pass(double *taps, size_t ntaps, double sample_rate, double cutoff, double width, double gain)
 {
 	int n, M;
@@ -317,7 +335,6 @@ int fir_int16_resampler_init(fir_int16_t *s, int interpolation, int decimation)
 	
 	/* Generate the filter taps */
 	ntaps = 21 * interpolation;
-	ntaps += (ntaps % interpolation ? interpolation - (ntaps % interpolation) : 0);
 	if((ntaps & 1) == 0) ntaps--;
 	
 	taps = calloc(ntaps, sizeof(double));
@@ -361,17 +378,15 @@ int fir_int16_complex_init(fir_int16_t *s, const double *taps, unsigned int ntap
 	s->ntaps = ntaps + (ntaps % interpolation ? interpolation - (ntaps % interpolation) : 0);
 	s->ataps = s->ntaps / interpolation;
 	
-	s->itaps = calloc(s->ntaps, sizeof(int16_t) * 2);
-	s->qtaps = calloc(s->ntaps, sizeof(int16_t) * 2);
+	s->itaps = calloc(s->ntaps, sizeof(int16_t));
+	s->qtaps = calloc(s->ntaps, sizeof(int16_t));
 	
 	/* Copy the taps in the order and format they are to be used */
 	j = s->ntaps - s->ataps;
 	for(i = ntaps - 1; i >= 0; i--)
 	{
-		s->itaps[j * 2 + 0] = lround( taps[i * 2 + 0] * 32767.0);
-		s->itaps[j * 2 + 1] = lround(-taps[i * 2 + 1] * 32767.0);
-		s->qtaps[j * 2 + 0] = lround( taps[i * 2 + 1] * 32767.0);
-		s->qtaps[j * 2 + 1] = lround( taps[i * 2 + 0] * 32767.0);
+		s->itaps[j] = lround(taps[i * 2 + 0] * 32767.0);
+		s->qtaps[j] = lround(taps[i * 2 + 1] * 32767.0);
 		j -= s->ataps;
 		if(j < 0) j += s->ntaps + 1;
 	}
@@ -409,10 +424,10 @@ size_t fir_int16_complex_process(fir_int16_t *s, int16_t *out, const int16_t *in
 			qtaps = &s->qtaps[s->d * s->ataps];
 			
 			/* Calculate the next output sample */
-			for(ai = aq = y = 0; y < s->ataps; y++)
+			for(ai = aq = y = 0; y < s->ataps; y++, win += 2, itaps++, qtaps++)
 			{
-				ai += *(win++) * *(itaps++);
-				aq += *(win++) * *(qtaps++);
+				ai += win[0] * *itaps - win[1] * *qtaps;
+				aq += win[0] * *qtaps + win[1] * *itaps;
 			}
 			
 			ai >>= 15;

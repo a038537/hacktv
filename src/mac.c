@@ -1130,7 +1130,7 @@ int mac_init(vid_t *s)
 	/* Set the video properties */
 	s->active_width &= ~1;	/* Ensure the active width is an even number */
 	mac->chrominance_width = s->active_width / 2;
-	mac->chrominance_left  = round(s->pixel_rate * (233.5 / MAC_CLOCK_RATE));
+	mac->chrominance_left  = round(s->pixel_rate * (233.0 / MAC_CLOCK_RATE));
 	mac->white_ref_left    = round(s->pixel_rate * (371.0 / MAC_CLOCK_RATE));
 	mac->black_ref_left    = round(s->pixel_rate * (533.0 / MAC_CLOCK_RATE));
 	mac->black_ref_right   = round(s->pixel_rate * (695.0 / MAC_CLOCK_RATE));
@@ -1695,7 +1695,7 @@ static int _line_625(vid_t *s, int frame, int line, uint8_t *data, int x)
 	dx = _bits(df, dx, 1, 1);                          /* Rp Repacement */
 	dx = _bits(df, dx, 1, 1);                          /* Fp Fingerprint */
 	dx = _bits(df, dx, 3, 2);                          /* Unallocated, both bits set to 1 */
-	dx = _bits(df, dx, 0, 1);                          /* SIFT Service identification channel format */
+	dx = _bits(df, dx, 1, 1);                          /* SIFT Service identification channel format */
 	_bch_encode(df, 71, 57);
 	
 	ix = _bits_buf(il, ix, df, 71);
@@ -1843,7 +1843,7 @@ int mac_next_line(vid_t *s, void *arg, int nlines, vid_line_t **lines)
 		
 		int golay;
 		
-		golay = l->frame & 1;
+		golay = (l->frame & 0xF) == 1 ? 1 : 0;
 		
 		/* Reset PRBS for packet scrambling */
 		_prbs1_reset(&s->mac, l->frame - 1);
@@ -1854,7 +1854,7 @@ int mac_next_line(vid_t *s, void *arg, int nlines, vid_line_t **lines)
 		/* Push a service information packet at the start of each new
 		 * frame. Alternates between DG0 and DG3 each frame. DG0 is
 		 * added to both subframes for D-MAC */
-		switch(l->frame % 3)
+		switch(l->frame % 4)
 		{
 		case 0: /* Write DG0 to 1st and 2nd subframes */
 			
@@ -1870,12 +1870,14 @@ int mac_next_line(vid_t *s, void *arg, int nlines, vid_line_t **lines)
 			_write_dg_packet(s, pkt, x, 3, golay);
 			break;
 			
-		case 2: /* Write DG4 and DG9 to 1st subframe */
+		case 2: /* Write DG4 to 1st subframe */
 			
 			x = _create_si_dg4_packet(&s->mac, pkt, golay);
 			
 			_write_dg_packet(s, pkt, x, 4, golay);
-
+			break;
+		
+		case 3: /* Write DG4 to 1st subframe */
 			x = _create_si_dg9_packet(&s->mac, pkt);
 			
 			_write_dg_packet(s, pkt, x, 9, golay);
@@ -1976,7 +1978,7 @@ int mac_next_line(vid_t *s, void *arg, int nlines, vid_line_t **lines)
 	
 	/* Shift the lines by one if the source
 	 * video has the bottom field first */
-	if(s->vframe.interlaced == 2) y += 1;
+	if(y >= 0 && s->vframe.interlaced == 2) y += 1;
 	
 	if(y < 0 || y >= s->conf.active_lines) y = -1;
 	
@@ -1987,15 +1989,31 @@ int mac_next_line(vid_t *s, void *arg, int nlines, vid_line_t **lines)
 		uint32_t *px = &rgb;
 		int stride = 0;
 		
-		if(s->vframe.framebuffer != NULL)
+		/* Centre the video vertically */
+		y -= s->vframe_y;
+		
+		/* Check for out of bounds */
+		if(y < 0 || y >= s->vframe.height) y = -1;
+		
+		if(y >= 0 && s->vframe.framebuffer != NULL)
 		{
 			px = &s->vframe.framebuffer[y * s->vframe.line_stride];
 			stride = s->vframe.pixel_stride;
 		}
 		
-		for(x = s->active_left; x < s->active_left + s->active_width; x++, px += stride)
+		for(x = s->active_left; x < s->active_left + s->vframe_x; x++)
+		{
+			l->output[x * 2] = s->yiq_level_lookup[0x000000].y;
+		}
+		
+		for(; x < s->active_left + s->vframe_x + s->vframe.width; x++, px += stride)
 		{
 			l->output[x * 2] = s->yiq_level_lookup[*px & 0xFFFFFF].y;
+		}
+		
+		for(; x < s->active_left + s->active_width; x++)
+		{
+			l->output[x * 2] = s->yiq_level_lookup[0x000000].y;
 		}
 	}
 	
@@ -2014,7 +2032,7 @@ int mac_next_line(vid_t *s, void *arg, int nlines, vid_line_t **lines)
 			stride = s->vframe.pixel_stride * 2;
 		}
 		
-		for(x = s->mac.chrominance_left; x < s->mac.chrominance_left + s->mac.chrominance_width; x++, px += stride)
+		for(x = s->mac.chrominance_left + s->vframe_x / 2; x < s->mac.chrominance_left + (s->vframe_x + s->vframe.width) / 2; x++, px += stride)
 		{
 			l->output[x * 2] += (l->line & 1 ? s->yiq_level_lookup[*px & 0xFFFFFF].i : s->yiq_level_lookup[*px & 0xFFFFFF].q);
 		}

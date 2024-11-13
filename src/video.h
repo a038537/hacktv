@@ -69,6 +69,14 @@ typedef struct vid_t vid_t;
 #define VID_MAC        8
 #define VID_CBS_405    9
 
+/* Frame orientation */
+#define VID_ROTATE_0   (0 << 0)
+#define VID_ROTATE_90  (1 << 0)
+#define VID_ROTATE_180 (2 << 0)
+#define VID_ROTATE_270 (3 << 0)
+#define VID_HFLIP      (1 << 2)
+#define VID_VFLIP      (1 << 3)
+
 /* Output modulation types */
 #define VID_NONE 0
 #define VID_AM   1
@@ -173,6 +181,8 @@ typedef struct {
 	int type;
 	
 	rational_t frame_rate;
+	rational_t frame_aspects[2];
+	int frame_orientation;
 	
 	int lines;
 	int hline;
@@ -399,6 +409,8 @@ struct vid_t {
 	
 	/* Video state */
 	av_frame_t vframe;
+	int vframe_x;
+	int vframe_y;
 	
 	/* The frame and line number being rendered next */
 	int bframe;
@@ -448,6 +460,7 @@ struct vid_t {
 	_mod_fm_t fm_right;
 	
 	/* Zweikanalton / A2 Stereo state */
+	int a2stereo_system_m;
 	_mod_am_t a2stereo_pilot;
 	_mod_am_t a2stereo_signal;
 	

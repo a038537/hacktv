@@ -1,0 +1,95 @@
+diff --git a/src/av_ffmpeg.c b/src/av_ffmpeg.c
+index 115a4f3..cd5efca 100755
+--- a/src/av_ffmpeg.c
++++ b/src/av_ffmpeg.c
+@@ -731,7 +731,7 @@ static void *_video_scaler_thread(void *arg)
+ 		/* Print logo, if enabled */
+ 		if(s->av_logo)
+ 		{
+-			overlay_image((uint32_t *) oframe->data[0], s->av_logo, oframe->width + 2, oframe->height, s->av_logo->position);
++			overlay_image((uint32_t *) oframe->data[0], s->av_logo, oframe->width, oframe->linesize[0] / sizeof(uint32_t), oframe->height, s->av_logo->position);
+ 		}
+ 	
+ 		/* Print subtitles to video frame, if enabled */
+@@ -852,7 +852,7 @@ static int _ffmpeg_read_video(void *ctx, av_frame_t *frame)
+ 	{
+ 		avframe = s->out_video_buffer.frame[0];
+ 		
+-		overlay_image((uint32_t *) avframe->data[0], s->media_icons[1], avframe->width + 2, avframe->height, IMG_POS_MIDDLE);
++		overlay_image((uint32_t *) avframe->data[0], s->media_icons[1], avframe->width, avframe->linesize[0] / sizeof(uint32_t), avframe->height, IMG_POS_MIDDLE);
+ 		s->last_paused = time(0);
+ 	}
+ 	else
+@@ -861,7 +861,7 @@ static int _ffmpeg_read_video(void *ctx, av_frame_t *frame)
+ 		/* Show 'play' icon for 5 seconds after resuming play */
+ 		if(time(0) - s->last_paused < 5)
+ 		{
+-			overlay_image((uint32_t *) avframe->data[0], s->media_icons[0], avframe->width + 2, avframe->height, IMG_POS_MIDDLE);
++			overlay_image((uint32_t *) avframe->data[0], s->media_icons[0], avframe->width, avframe->linesize[0] / sizeof(uint32_t), avframe->height, IMG_POS_MIDDLE);
+ 		}
+ 	}
+ 
+diff --git a/src/av_test.c b/src/av_test.c
+index 0bc5ba4..06d1261 100755
+--- a/src/av_test.c
++++ b/src/av_test.c
+@@ -189,7 +189,7 @@ int av_test_open(av_t *av, char *test_screen, void *ctx)
+ 	{
+ 		if(load_png(&t->test_pattern, t->width, t->height, test_screen, 1.0, img_ratio, IMG_TEST) == HACKTV_OK)
+ 		{	
+-			overlay_image(t->video, t->test_pattern, t->width, t->height, IMG_POS_FULL);
++			overlay_image(t->video, t->test_pattern, t->width, t->width, t->height, IMG_POS_FULL);
+ 			
+ 			if(strcmp(test_screen, "pm5544") == 0)
+ 			{
+@@ -303,7 +303,7 @@ int av_test_open(av_t *av, char *test_screen, void *ctx)
+ 	{
+ 		if(load_png(&t->logo, t->width, t->height, conf->logo, 0.75, img_ratio, IMG_LOGO) == HACKTV_OK)
+ 		{
+-			overlay_image(t->video, t->logo, t->width, t->height, t->logo->position);
++			overlay_image(t->video, t->logo, t->width, t->width, t->height, t->logo->position);
+ 		}
+ 		else
+ 		{
+@@ -360,4 +360,4 @@ int av_test_open(av_t *av, char *test_screen, void *ctx)
+ 	av->close = _test_close;
+ 	
+ 	return(HACKTV_OK);
+-}
+\ No newline at end of file
++}
+diff --git a/src/graphics.c b/src/graphics.c
+index d48e840..c1c5026 100755
+--- a/src/graphics.c
++++ b/src/graphics.c
+@@ -288,7 +288,7 @@ int load_png(image_t **s, int width, int height, char *image_name, float scale,
+ }
+ 
+ 
+-void overlay_image(uint32_t *framebuffer, image_t *l, int vid_width, int vid_height, int pos)
++void overlay_image(uint32_t *framebuffer, image_t *l, int vid_width, int line_stride, int vid_height, int pos)
+ {
+ 	int i, j, x, y, r, g, b, vi;
+ 	float t;
+@@ -357,7 +357,7 @@ void overlay_image(uint32_t *framebuffer, image_t *l, int vid_width, int vid_hei
+ 				t = 1.0 - (float) (c >> 24) / 0xFF;
+ 				
+ 				/* Set logo position */
+-				vi = i * vid_width + j;
++				vi = i * line_stride + j;
+ 				
+ 				/* Apply transparency  */
+ 				r = ((framebuffer[vi] >> 16) & 0xFF) * t + ((c >> 16) & 0xFF) * (1 - t);
+diff --git a/src/graphics.h b/src/graphics.h
+index 7836658..9a8c22b 100755
+--- a/src/graphics.h
++++ b/src/graphics.h
+@@ -64,7 +64,7 @@ typedef struct {
+ } png_mem_t;
+ 
+ extern int read_png_file(image_t *image);
+-extern void overlay_image(uint32_t *framebuffer, image_t *l, int vid_width, int vid_height, int pos);
++extern void overlay_image(uint32_t *framebuffer, image_t *l, int vid_width, int line_stride, int vid_height, int pos);
+ extern int load_png(image_t **s, int width, int height, char *filename, float scale, float ratio, int type);
+ extern void resize_bitmap(uint32_t *input, uint32_t *output, int old_width, int old_height, int new_width, int new_height);
+ #endif

@@ -106,7 +106,7 @@ static char *_get_subtitle_string(char *fmt)
 	c = 0;
 	s = 0;
 	
-	l = strlen(fmt);
+	l = strlen(fmt) - 3;
 	static char txt[256];
 	
 	for(int a = 0; a < l; a++) txt[a] = '\0';
@@ -115,7 +115,7 @@ static char *_get_subtitle_string(char *fmt)
 	{
 		if(fmt[i] == ',') c++;
 		
-		if(c > 7)
+		if(c > 8)
 		{
 			txt[s] = fmt[i + 1];
 			s++;

@@ -44,13 +44,15 @@ static int _test_read_video(void *ctx, av_frame_t *frame)
 	/* Get current time */
 	time_t secs = time(0);
 	struct tm *time = localtime(&secs);
-	asprintf(&s->font[TEXT_TIMESTAMP]->text, "%02d:%02d:%02d", time->tm_hour, time->tm_min, time->tm_sec);
+	s->font[TEXT_TIMESTAMP]->text = malloc(16 * sizeof(char));
+	sprintf(s->font[TEXT_TIMESTAMP]->text, "%02d:%02d:%02d", time->tm_hour, time->tm_min, time->tm_sec);
 
 	/* Print clock */
 	if(s->font[TEXT_TIMESTAMP])
 	{
 		print_generic_text(	s->font[TEXT_TIMESTAMP],
 							s->video,
+							s->width,
 							s->font[TEXT_TIMESTAMP]->text,
 							s->font[TEXT_TIMESTAMP]->x_loc, s->font[TEXT_TIMESTAMP]->y_loc, NO_TEXT_SHADOW, TEXT_BOX, 0, 1);
 	}
@@ -189,7 +191,7 @@ int av_test_open(av_t *av, char *test_screen, void *ctx)
 	{
 		if(load_png(&t->test_pattern, t->width, t->height, test_screen, 1.0, img_ratio, IMG_TEST) == HACKTV_OK)
 		{	
-			overlay_image(t->video, t->test_pattern, t->width, t->height, IMG_POS_FULL);
+			overlay_image(t->video, t->test_pattern, t->width, t->width, t->height, IMG_POS_FULL);
 			
 			if(strcmp(test_screen, "pm5544") == 0)
 			{
@@ -290,12 +292,12 @@ int av_test_open(av_t *av, char *test_screen, void *ctx)
 		}
 		else
 		{
-			print_generic_text(	t->font[TEXT_GENERIC], t->video, "HACKTV", t->font[TEXT_GENERIC]->x_loc, t->font[TEXT_GENERIC]->y_loc, NO_TEXT_SHADOW, TEXT_BOX, 0, 1);
+			print_generic_text(	t->font[TEXT_GENERIC], t->video, t->width, "HACKTV", t->font[TEXT_GENERIC]->x_loc, t->font[TEXT_GENERIC]->y_loc, NO_TEXT_SHADOW, TEXT_BOX, 0, 1);
 		}
 	}
 	else
 	{
-		print_generic_text(	t->font[TEXT_GENERIC], t->video, "HACKTV", t->font[TEXT_GENERIC]->x_loc, t->font[TEXT_GENERIC]->y_loc, NO_TEXT_SHADOW, TEXT_BOX, 0, 1);
+		print_generic_text(	t->font[TEXT_GENERIC], t->video, t->width, "HACKTV", t->font[TEXT_GENERIC]->x_loc, t->font[TEXT_GENERIC]->y_loc, NO_TEXT_SHADOW, TEXT_BOX, 0, 1);
 	}
 	
 	/* Print logo, if enabled */
@@ -303,7 +305,7 @@ int av_test_open(av_t *av, char *test_screen, void *ctx)
 	{
 		if(load_png(&t->logo, t->width, t->height, conf->logo, 0.75, img_ratio, IMG_LOGO) == HACKTV_OK)
 		{
-			overlay_image(t->video, t->logo, t->width, t->height, t->logo->position);
+			overlay_image(t->video, t->logo, t->width, t->width, t->height, t->logo->position);
 		}
 		else
 		{

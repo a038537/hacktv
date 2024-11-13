@@ -888,23 +888,19 @@ static void _reverse_byte(uint8_t *out, uint8_t *in)
 
 }
 
-static uint8_t _update_ecm_packet_ec_s(eurocrypt_t *e, int t, int nd)
+static uint8_t _update_ecm_packet_ec_s(eurocrypt_t *e)
 {
 	int x;
 	uint8_t *pkt = e->ecm_pkt;
 	
 	memset(pkt, 0, MAC_PAYLOAD_BYTES * 2);
 	
-	/* PT - always 0x00 for ECM */
 	x = 0;
-	pkt[x++] = ECM;  /* Packet type */
-	
-	pkt[x++] = 0x01; /* ?? */
-	
-	pkt[x++] = 0x60; /* ?? */
+	pkt[x++] = 0x00; /* ?? */
+	pkt[x++] = 0x00; /* ?? */
+	pkt[x++] = 0x60; /* Provider ID */
 	pkt[x++] = 0x47; /* Provider ID */
-
-	pkt[x++] = 0x00; /* Don't test date/sub ? */
+	pkt[x++] = 0x00; /* ?? */
 
 	uint16_t d = _get_ec_date(strcmp(e->mode->date, "TODAY") == 0 ? _get_sub_date(0, e->mode->date) : e->mode->date, e->mode->des_algo);
 	pkt[x++] = (d & 0xFF00) >> 8;
@@ -1569,7 +1565,7 @@ void eurocrypt_next_frame(vid_t *vid, int frame)
 		/* Update the ECM packet */
 		if(e->mode->packet_type == EC_S)
 		{
-			e->ecm_cont = _update_ecm_packet_ec_s(e, t, vid->conf.nodate);
+			e->ecm_cont = _update_ecm_packet_ec_s(e);
 		}
 		else
 		{
@@ -1608,8 +1604,8 @@ void eurocrypt_next_frame(vid_t *vid, int frame)
 		}
 	}
 	
-	/* Send an ECM packet every 12 frames - ~0.5s */
-	if(frame % 12 == 0)
+	/* Send an ECM packet every 64 frames - ~2.5s */
+	if((frame % 64) == 1)
 	{
 		uint8_t pkt[MAC_PAYLOAD_BYTES];
 		memset(pkt, 0, MAC_PAYLOAD_BYTES);
@@ -1813,7 +1809,7 @@ int eurocrypt_init(vid_t *vid, const char *mode)
 	/* Generate initial packet */
 	if(e->mode->packet_type == EC_S)
 	{
-		e->ecm_cont = _update_ecm_packet_ec_s(e, 0, vid->conf.nodate);
+		e->ecm_cont = _update_ecm_packet_ec_s(e);
 	}
 	else
 	{

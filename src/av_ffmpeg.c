@@ -111,6 +111,7 @@ typedef struct {
 	uint32_t *video;
 	uint8_t paused;
 	time_t last_paused;
+	av_t *av;
 	
 	AVFormatContext *format_ctx;
 	
@@ -526,6 +527,8 @@ static void *_input_thread(void *arg)
 
 					max_bitmap_width = 0;
 					max_bitmap_height = 0;
+					bitmap_ratio = 0;
+					bitmap_scale = 0;
 					
 					for(i = 0; i < sub.num_rects; i++)
 					{
@@ -651,6 +654,7 @@ static void *_video_scaler_thread(void *arg)
 	av_ffmpeg_t *s = (av_ffmpeg_t *) arg;
 	AVFrame *frame, *oframe;
 	AVRational ratio;
+	rational_t r;
 	int64_t pts;
 	
 	/* Fetch video frames and pass them through the scaler */
@@ -681,6 +685,58 @@ static void *_video_scaler_thread(void *arg)
 		
 		oframe = _frame_dbuffer_back_buffer(&s->out_video_buffer);
 		
+		ratio = av_guess_sample_aspect_ratio(s->format_ctx, s->video_stream, frame);
+		
+		if(ratio.num == 0 || ratio.den == 0)
+		{
+			/* Default to square pixels if the ratio looks odd */
+			ratio = (AVRational) { 1, 1 };
+		}
+		
+		r = av_calculate_frame_size(
+			s->av,
+			(rational_t) { frame->width, frame->height },
+			rational_mul(
+				(rational_t) { ratio.num, ratio.den },
+				(rational_t) { frame->width, frame->height }
+			)
+		);
+		
+		if(r.num != oframe->width ||
+		   r.den != oframe->height)
+		{
+			av_freep(&oframe->data[0]);
+			
+			oframe->format = AV_PIX_FMT_RGB32;
+			oframe->width = r.num;
+			oframe->height = r.den;
+			
+			int i = av_image_alloc(
+				oframe->data,
+				oframe->linesize,
+				oframe->width, oframe->height,
+				AV_PIX_FMT_RGB32, av_cpu_max_align()
+			);
+			memset(oframe->data[0], 0, i);
+		}
+		
+		/* Initialise / re-initialise software scaler */
+		s->sws_ctx = sws_getCachedContext(
+			s->sws_ctx,
+			frame->width,
+			frame->height,
+			frame->format,
+			oframe->width,
+			oframe->height,
+			AV_PIX_FMT_RGB32,
+			SWS_BICUBIC,
+			NULL,
+			NULL,
+			NULL
+		);
+		
+		if(!s->sws_ctx) break;
+		
 		sws_scale(
 			s->sws_ctx,
 			(uint8_t const * const *) frame->data,
@@ -690,14 +746,6 @@ static void *_video_scaler_thread(void *arg)
 			oframe->data,
 			oframe->linesize
 		);
-		
-		ratio = frame->sample_aspect_ratio;
-		
-		if(ratio.num == 0 || ratio.den == 0)
-		{
-			/* Default to square pixels if the ratio looks odd */
-			ratio = (AVRational) { 1, 1 };
-		}
 		
 		/* Adjust the pixel ratio for the scaled image */
 		av_reduce(
@@ -722,7 +770,7 @@ static void *_video_scaler_thread(void *arg)
 		if(s->font[TEXT_TIMESTAMP])
 		{
 			asprintf(&s->font[TEXT_TIMESTAMP]->text, "%02d:%02d:%02d", hr, min, sec);
-			print_generic_text(s->font[TEXT_TIMESTAMP], (uint32_t *) oframe->data[0], s->font[TEXT_TIMESTAMP]->text, 10, 90, TEXT_SHADOW, NO_TEXT_BOX, 0, 0);
+			print_generic_text(s->font[TEXT_TIMESTAMP], (uint32_t *) oframe->data[0], oframe->linesize[0] / sizeof(uint32_t), s->font[TEXT_TIMESTAMP]->text, 10, 90, TEXT_SHADOW, NO_TEXT_BOX, 0, 0);
 
 			/* Free memory */
 			free(s->font[TEXT_TIMESTAMP]->text);
@@ -731,7 +779,7 @@ static void *_video_scaler_thread(void *arg)
 		/* Print logo, if enabled */
 		if(s->av_logo)
 		{
-			overlay_image((uint32_t *) oframe->data[0], s->av_logo, oframe->width + 2, oframe->height, s->av_logo->position);
+			overlay_image((uint32_t *) oframe->data[0], s->av_logo, oframe->width, oframe->linesize[0] / sizeof(uint32_t), oframe->height, s->av_logo->position);
 		}
 	
 		/* Print subtitles to video frame, if enabled */
@@ -751,7 +799,7 @@ static void *_video_scaler_thread(void *arg)
 
 				if(s->vid_conf->subtitles)
 				{
-					print_subtitle(s->font[TEXT_SUBTITLE], (uint32_t *) oframe->data[0], s->font[TEXT_SUBTITLE]->text);
+					print_subtitle(s->font[TEXT_SUBTITLE], (uint32_t *) oframe->data[0], oframe->linesize[0] / sizeof(uint32_t), s->font[TEXT_SUBTITLE]->text);
 				}
 
 				/* Free memory */
@@ -761,13 +809,18 @@ static void *_video_scaler_thread(void *arg)
 			{
 				int w, h, sindex;
 				sindex = get_bitmap_subtitle(s->av_sub, frame->best_effort_timestamp, &w, &h);				
-				if(w > 0) display_bitmap_subtitle(s->font[TEXT_SUBTITLE], (uint32_t *) oframe->data[0], w, h, s->av_sub[sindex].bitmap);
+				if(w > 0) display_bitmap_subtitle(s->font[TEXT_SUBTITLE], (uint32_t *) oframe->data[0], oframe->linesize[0] / sizeof(uint32_t), w, h, s->av_sub[sindex].bitmap);
 			}
 		}
 
 		/* Copy some data to the scaled image */
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(58, 29, 100)
+		oframe->interlaced_frame = frame->flags & AV_FRAME_FLAG_INTERLACED ? 1 : 0;
+		oframe->top_field_first = frame->flags & AV_FRAME_FLAG_TOP_FIELD_FIRST ? 1 : 0;
+#else
 		oframe->interlaced_frame = frame->interlaced_frame;
 		oframe->top_field_first = frame->top_field_first;
+#endif
 		
 		/* Done with the frame */
 		av_frame_unref(frame);
@@ -852,7 +905,7 @@ static int _ffmpeg_read_video(void *ctx, av_frame_t *frame)
 	{
 		avframe = s->out_video_buffer.frame[0];
 		
-		overlay_image((uint32_t *) avframe->data[0], s->media_icons[1], avframe->width + 2, avframe->height, IMG_POS_MIDDLE);
+		overlay_image((uint32_t *) avframe->data[0], s->media_icons[1], avframe->width, avframe->linesize[0] / sizeof(uint32_t), avframe->height, IMG_POS_MIDDLE);
 		s->last_paused = time(0);
 	}
 	else
@@ -861,7 +914,7 @@ static int _ffmpeg_read_video(void *ctx, av_frame_t *frame)
 		/* Show 'play' icon for 5 seconds after resuming play */
 		if(time(0) - s->last_paused < 5)
 		{
-			overlay_image((uint32_t *) avframe->data[0], s->media_icons[0], avframe->width + 2, avframe->height, IMG_POS_MIDDLE);
+			overlay_image((uint32_t *) avframe->data[0], s->media_icons[0], avframe->width, avframe->linesize[0] / sizeof(uint32_t), avframe->height, IMG_POS_MIDDLE);
 		}
 	}
 
@@ -1173,10 +1226,10 @@ int av_ffmpeg_open(vid_t *vid, void *ctx, char *input_url, char *format, char *o
 	AVChannelLayout dst_ch_layout = AV_CHANNEL_LAYOUT_STEREO;
 #endif
 	int64_t start_time = 0;
-	int r, i, ws;
+	int r, i, ws = 0;
 
 	/* Default ratio */
-	float source_ratio;
+	float source_ratio = 0;
 
 	/* Filter declarations */
 	char *_filter_args;
@@ -1189,6 +1242,10 @@ int av_ffmpeg_open(vid_t *vid, void *ctx, char *input_url, char *format, char *o
 	}
 
 	s->paused = 0;
+	
+	s->av = av;
+	
+	s->av = av;
 	
 	/* Use 'pipe:' for stdin */
 	if(strcmp(input_url, "-") == 0)
@@ -1616,7 +1673,6 @@ int av_ffmpeg_open(vid_t *vid, void *ctx, char *input_url, char *format, char *o
 			};
 			
 			s->font[TEXT_SUBTITLE] = av->av_font;
-			s->font[TEXT_SUBTITLE]->video_width += 2;
 
 			fprintf(stderr, "Using subtitle stream %d.\n", s->subtitle_stream->index);
 			
@@ -1676,7 +1732,6 @@ int av_ffmpeg_open(vid_t *vid, void *ctx, char *input_url, char *format, char *o
 				}
 				
 				s->font[TEXT_SUBTITLE] = av->av_font;
-				s->font[TEXT_SUBTITLE]->video_width += 2;
 			}
 		}
 	}
@@ -1718,7 +1773,6 @@ int av_ffmpeg_open(vid_t *vid, void *ctx, char *input_url, char *format, char *o
 		};
 		
 		s->font[TEXT_TIMESTAMP] = av->av_font;
-		s->font[TEXT_TIMESTAMP]->video_width += 2;
 	}
 	
 	/* Calculate ratio */
